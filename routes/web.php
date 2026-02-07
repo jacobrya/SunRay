@@ -8,7 +8,11 @@ Route::get('/', function () {
     return view('weatherinput');
 });
 
-Route::get('/weather',[WeatherController::class,'get'])->name('weather.get');
+
+
+Route::get('/weather', [WeatherController::class, 'showForm'])->name('weather.form');
+Route::post('/weather', [WeatherController::class, 'getWeather'])->name('weather.get');
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');

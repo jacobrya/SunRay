@@ -11,7 +11,7 @@ class WeatherRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class WeatherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'city' => 'required|string|min:2|max:100',
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'city.required' => 'Пожалуйста, введите название города',
+            'city.min' => 'Название города должно содержать минимум 2 символа',
+            'city.max' => 'Название города слишком длинное',
         ];
     }
 }
