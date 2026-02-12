@@ -4,15 +4,13 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class WeatherService
 {
-    /**
-     * Create a new class instance.
-     */
-
     private string $apiKey;
     private string $baseUrl;
+    private int $cacheTtl = 1800;
 
     public function __construct()
     {
@@ -22,33 +20,46 @@ class WeatherService
 
     public function getWeatherByCity(string $city): ?array
     {
-        try{
+        $cacheKey = 'weather:' . strtolower(trim($city));
+
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($city) {
+            return $this->fetchFromApi($city);
+        });
+    }
+
+    private function fetchFromApi(string $city): ?array
+    {
+        try {
             $response = Http::get($this->baseUrl, [
-                'q' => $city,
+                'q'     => $city,
                 'appid' => $this->apiKey,
                 'units' => 'metric',
-                'lang' => 'ru'
+                'lang'  => 'ru'
             ]);
+
             if ($response->successful()) {
                 return $response->json();
             }
 
             Log::warning('Weather API error', [
-                'city' => $city,
+                'city'   => $city,
                 'status' => $response->status()
             ]);
 
             return null;
-        }
-        catch (\Exception $e) {
+
+        } catch (\Exception $e) {
             Log::error('Weather service exception', [
-                'city' => $city,
+                'city'  => $city,
                 'error' => $e->getMessage()
             ]);
 
             return null;
         }
+    }
 
+    public function clearCache(string $city): void
+    {
+        Cache::forget('weather:' . strtolower(trim($city)));
     }
 }
-

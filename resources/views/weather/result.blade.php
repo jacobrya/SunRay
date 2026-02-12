@@ -17,5 +17,10 @@
 </div>
 
 <a href="{{ route('weather.form') }}">Проверить другой город</a>
+@if($fromCache)
+    <p style="color: green">⚡ Данные из кеша Redis</p>
+@else
+    <p style="color: orange">🌐 Данные получены из API</p>
+@endif
 </body>
 </html>

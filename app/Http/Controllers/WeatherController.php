@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-namespace App\Http\Controllers;
 
 use App\Http\Requests\WeatherRequest;
 use App\Services\WeatherService;
+use Illuminate\Support\Facades\Cache;
 
 class WeatherController extends Controller
 {
@@ -23,6 +23,9 @@ class WeatherController extends Controller
     public function getWeather(WeatherRequest $request)
     {
         $city = $request->validated()['city'];
+        $cacheKey = 'weather:' . strtolower(trim($city));
+        $fromCache = Cache::has($cacheKey);
+
         $weather = $this->weatherService->getWeatherByCity($city);
 
         if (!$weather) {
@@ -33,7 +36,8 @@ class WeatherController extends Controller
 
         return view('weather.result', [
             'city' => $city,
-            'weather' => $weather
+            'weather' => $weather,
+            'fromCache' => $fromCache
         ]);
     }
 }
